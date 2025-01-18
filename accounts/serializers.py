@@ -1,25 +1,21 @@
-from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
 
 
-class RoleSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["role"]
-
-
 class SignupSerializer(ModelSerializer):
-    roles = RoleSerializer(read_only=True)
+    roles = serializers.CharField(source="role", read_only=True)
 
     class Meta:
         model = User
         fields = ["username", "password", "nickname", "roles"]
 
-        write_only_fields = ("password",)
+        extra_kwargs = {
+            "password": {"write_only": True},
+        }
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -27,5 +23,12 @@ class SignupSerializer(ModelSerializer):
             password=validated_data["password"],
             nickname=validated_data["nickname"],
         )
-
         return user
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        return {
+            "username": representation["username"],
+            "nickname": representation["nickname"],
+            "roles": [{"role": representation["roles"]}],
+        }
