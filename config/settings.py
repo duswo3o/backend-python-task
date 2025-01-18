@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",  # required for Django collectstatic discovery
+    "rest_framework.authtoken",
     # local
     "accounts",
 ]
